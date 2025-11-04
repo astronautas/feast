@@ -67,10 +67,12 @@ def test_get_client_returns_different_objects_for_separate_threads(
 
     # Thread 1's two calls should return the same client (thread-local reuse)
     client_1a, client_1b = results["thread_1"]
-    assert client_1a is client_1b, "Same thread should get same client instance"
+    assert client_1a is client_1b, (
+        "Same thread should get same client instance (cached)"
+    )
 
     # Thread 2's client should be different from thread 1's client
     client_2 = results["thread_2"]
     assert client_1a is not client_2, (
-        "Different threads should get different client instances"
+        "Different threads should get different client instances (not cached)"
     )
