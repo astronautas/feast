@@ -543,7 +543,7 @@ class FeatureStore:
 
     def delete_feature_view(self, name: str):
         """
-        Deletes a feature view of any kind (FeatureView, OnDemandFeatureView, StreamFeatureView).
+        Deletes a feature view.
 
         Args:
             name: Name of feature view.
@@ -1331,6 +1331,7 @@ class FeatureStore:
         feature_view: OnDemandFeatureView,
         start_date: datetime,
         end_date: datetime,
+        full_feature_names: bool,
     ):
         """Helper to materialize a single OnDemandFeatureView."""
         if not feature_view.source_feature_view_projections:
@@ -1428,6 +1429,7 @@ class FeatureStore:
         retrieval_job = self.get_historical_features(
             entity_df=entity_df,
             features=source_features_from_projections,
+            full_feature_names=full_feature_names,
         )
         input_df = retrieval_job.to_df()
         transformed_df = self._transform_on_demand_feature_view_df(
@@ -1439,6 +1441,7 @@ class FeatureStore:
         self,
         end_date: datetime,
         feature_views: Optional[List[str]] = None,
+        full_feature_names: bool = False,
     ) -> None:
         """
         Materialize incremental new data from the offline store into the online store.
@@ -1498,7 +1501,12 @@ class FeatureStore:
                     print(
                         f"{Style.BRIGHT + Fore.GREEN}{feature_view.name}{Style.RESET_ALL}:"
                     )
-                    self._materialize_odfv(feature_view, odfv_start_date, end_date)
+                    self._materialize_odfv(
+                        feature_view,
+                        odfv_start_date,
+                        end_date,
+                        full_feature_names=full_feature_names,
+                    )
                 continue
 
             start_date = feature_view.most_recent_end_time
@@ -1553,6 +1561,7 @@ class FeatureStore:
         start_date: datetime,
         end_date: datetime,
         feature_views: Optional[List[str]] = None,
+        full_feature_names: bool = False,
         disable_event_timestamp: bool = False,
     ) -> None:
         """
@@ -1603,7 +1612,12 @@ class FeatureStore:
                     print(
                         f"{Style.BRIGHT + Fore.GREEN}{feature_view.name}{Style.RESET_ALL}:"
                     )
-                    self._materialize_odfv(feature_view, start_date, end_date)
+                    self._materialize_odfv(
+                        feature_view,
+                        start_date,
+                        end_date,
+                        full_feature_names=full_feature_names,
+                    )
                 continue
             provider = self._get_provider()
             print(f"{Style.BRIGHT + Fore.GREEN}{feature_view.name}{Style.RESET_ALL}:")
